@@ -1,4 +1,4 @@
-module github.com/kardianos/service
+module github.com/kqbi/service
 
 go 1.10
 
