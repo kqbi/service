@@ -29,8 +29,22 @@ const (
 	SC_ACTION_RESTART     = 1
 	SC_ACTION_REBOOT      = 2
 	SC_ACTION_RUN_COMMAND = 3
+	SC_ACTION_OWN_RESTART = 4
+)
 
-	SERVICE_CONFIG_FAILURE_ACTIONS = 2
+const (
+ SERVICE_CONFIG_DESCRIPTION              = 1
+ SERVICE_CONFIG_FAILURE_ACTIONS          = 2
+ SERVICE_CONFIG_DELAYED_AUTO_START_INFO  = 3
+ SERVICE_CONFIG_FAILURE_ACTIONS_FLAG     = 4
+ SERVICE_CONFIG_SERVICE_SID_INFO         = 5
+ SERVICE_CONFIG_REQUIRED_PRIVILEGES_INFO = 6
+ SERVICE_CONFIG_PRESHUTDOWN_INFO         = 7
+ SERVICE_CONFIG_TRIGGER_INFO             = 8
+ SERVICE_CONFIG_PREFERRED_NODE           = 9
+// reserved                              = 10
+// reserved                              = 11
+ SERVICE_CONFIG_LAUNCH_PROTECTED         = 12
 )
 
 type SERVICE_FAILURE_ACTIONS struct {
@@ -44,6 +58,17 @@ type SERVICE_FAILURE_ACTIONS struct {
 type SC_ACTION struct {
 	Type  uint32
 	Delay uint32
+}
+
+type  _SERVICdefE_DELAYED_AUTO_START_INFO struct {
+       fDelayedAutostart uint32
+}
+
+type SERVICE_DELAYED_AUTO_START_INFO _SERVICdefE_DELAYED_AUTO_START_INFO
+
+func setDelayedAutoStart(handle windows.Handle) error {
+	t := SERVICE_DELAYED_AUTO_START_INFO{1}
+	return windows.ChangeServiceConfig2(handle, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (*byte)(unsafe.Pointer(&t)))
 }
 
 func setServiceFailureActions(handle windows.Handle) error {
@@ -265,6 +290,10 @@ func (ws *windowsService) Install() error {
 	}
 
 	//kqbi change
+	err = setDelayedAutoStart(s.Handle)
+	if err != nil {
+		panic(err)
+	}
 	err = setServiceFailureActions(s.Handle)
 	if err != nil {
 		panic(err)
